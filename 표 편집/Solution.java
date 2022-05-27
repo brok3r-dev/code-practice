@@ -1,5 +1,6 @@
 import java.util.Stack;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 class Solution {
     LinkedList<Node> table = new LinkedList<>();
@@ -11,10 +12,18 @@ class Solution {
             table.add(new Node(i));
         }
 
-        for (String c : cmd) {
-            k = action(k, c);
+        ListIterator<Node> iterator = table.listIterator();
+
+        for (int i = 0; i < k; i++) {
+            iterator.next();
         }
 
+        //execute command
+        for (String c : cmd) {
+            action(iterator, c);
+        }
+
+        //Create answer string
         String answer = "";
 
         for (int i = 0; i < table.size(); i++) {
@@ -28,31 +37,47 @@ class Solution {
         return answer;
     }
 
-    public int action(int k, String cmd) {
+    public void action(ListIterator<Node> iterator, String cmd) {
+        int move = 0;
+        Node n = null;
+
         switch (cmd.charAt(0)) {
             case 'U':
-                k -= Integer.parseInt(cmd.substring(2));
+                move = Integer.parseInt(cmd.substring(2));
+
+                while (move > 0) {
+                    n = iterator.previous();
+                    if (!n.getIsDeleted()) move--;
+                }
+
                 break;
             case 'D':
-                k += Integer.parseInt(cmd.substring(2));
-                break;
-            // case 'C':
-            //     int num = table.get(k);
-            //     deleted_recent.push(num);
-            //     table.remove(k);
-            //     int size = table.size();
-            //     k = (k >= size) ? size-1 : k;
-            //     break;
-            // case 'Z':
-            //     int curr = table.get(k);
-            //     int recover = deleted_recent.pop();
-            //     int index = search(table.getFirst(), table.getLast(), curr);
-            //     table.add(index, recover);
-            //     k = (curr >= recover) ? k+1 : k;
-            //     break;
-        }
+                move = Integer.parseInt(cmd.substring(2));
 
-        return k;
+                while (move > 0) {
+                    n = iterator.next();
+                    if (!n.getIsDeleted()) move--;
+                }
+
+                break;
+            case 'C':
+                if (iterator.hasNext()) {
+                    n = iterator.next();
+                } else {
+                    n = iterator.previous();
+                }
+
+                n.setIsDeleted(true);
+                iterator.set(n);
+
+                deleted_recent.push(n);
+                break;
+            case 'Z':
+                n = deleted_recent.pop();
+                n.setIsDeleted(false);
+                table.set(n.getValue(), n);
+                break;
+        }
     }
 
     static class Node {
@@ -70,6 +95,10 @@ class Solution {
 
         public boolean getIsDeleted() {
             return this.isDeleted;
+        }
+
+        public void setIsDeleted(boolean b) {
+            this.isDeleted = b;
         }
     }
 }
