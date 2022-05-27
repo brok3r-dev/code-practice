@@ -8,20 +8,12 @@ class Solution {
 
     public String solution(int n, int k, String[] cmd) {
         //Initialize
-        for (int i = 0; i < n; i++) {
-            table.add(new Node(i));
-        }
-
+        for (int i = 0; i < n; i++) { table.add(new Node(i)); }
         ListIterator<Node> iterator = table.listIterator();
-
-        for (int i = 0; i < k; i++) {
-            iterator.next();
-        }
+        for (int i = 0; i < k; i++) { iterator.next(); }
 
         //execute command
-        for (String c : cmd) {
-            action(iterator, c);
-        }
+        for (String c : cmd) { action(iterator, c); }
 
         //Create answer string
         String answer = "";
@@ -61,16 +53,37 @@ class Solution {
 
                 break;
             case 'C':
-                if (iterator.hasNext()) {
-                    n = iterator.next();
-                } else {
-                    n = iterator.previous();
-                }
-
+                n = iterator.next();
                 n.setIsDeleted(true);
                 iterator.set(n);
-
                 deleted_recent.push(n);
+
+                if (iterator.hasNext()) {
+                    Boolean flag = false;
+
+                    while(true) {
+                        if (!iterator.next().getIsDeleted()) {
+                            iterator.previous();
+                            break;
+                        }
+
+                        if (!iterator.hasNext()) {
+                            flag = true;
+                            break;
+                        }
+                    }
+
+                    if (flag) {
+                        while(iterator.hasPrevious()) {
+                            if (!iterator.previous().getIsDeleted()) { break; }
+                        }
+                    }
+                } else {
+                    while(iterator.hasPrevious()) {
+                        if (!iterator.previous().getIsDeleted()) { break; }
+                    }
+                }
+
                 break;
             case 'Z':
                 n = deleted_recent.pop();
@@ -99,6 +112,10 @@ class Solution {
 
         public void setIsDeleted(boolean b) {
             this.isDeleted = b;
+        }
+
+        public String toString() {
+            return this.value + " " + this.isDeleted;
         }
     }
 }
